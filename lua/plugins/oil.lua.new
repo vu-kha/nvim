@@ -1,0 +1,70 @@
+return {
+  {
+    "stevearc/oil.nvim",
+    ---@module 'oil'
+    ---@type oil.SetupOpts
+    opts = {},
+    -- Optional dependencies
+    dependencies = { { "echasnovski/mini.icons", opts = {} } },
+    -- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if prefer nvim-web-devicons
+    -- Function to determine if the path is on the AIX server
+
+    config = function()
+      -- Oil setup with dynamic adapter selectio
+      local function is_aix_path(path)
+        -- Check if the path belongs to the AIX server
+        -- Modify this condition based on your specific paths or patterns
+        print("1" .. path)
+        print("2" .. path)
+        print("3" .. path)
+        print("4" .. path)
+        return path:match("^aix://")
+      end
+      -- Function to list directories on AIX via SSH
+      local function ssh_list_directory(remote_path)
+        -- Strip the "aix://" prefix from the path
+        local actual_path = remote_path:gsub("^aixstl04://", "")
+        -- SSH command to list files
+        local ssh_command = "ssh aixstl04 'ls -1A " .. actual_path .. "'"
+        local handle = io.popen(ssh_command)
+        if not handle then
+          print("Error: Failed to execute SSH command")
+          return {}
+        end
+        local result = {}
+        for line in handle:lines() do
+          local full_path = actual_path .. "/" .. line
+          local stat_command = "ssh aixstl04 'test -d " .. full_path .. " && echo dir || echo file'"
+          local stat_handle = io.popen(stat_command)
+          local file_type = stat_handle:read("*l") or "file"
+          stat_handle:close()
+          table.insert(result, { name = line, type = file_type })
+        end
+        handle:close()
+        return result
+      end
+      require("oil").setup({
+        adapters = {
+          "filesystem", -- Default local filesystem adapter
+          dynamic_adapter = {
+            description = "Dynamic Adapter for AIX",
+            supports_read = true,
+            supports_write = false,
+            list = function(path)
+              print("01" .. path)
+              print("02" .. path)
+              if is_aix_path(path) then
+                print("Using AIX adapter for:", path)
+                return ssh_list_directory(path)
+              else
+                print("Using default adapter for:", path)
+                -- Fallback to the filesystem adapter or other logic
+                return require("oil.adapters.filesystem").list(path)
+              end
+            end,
+          },
+        },
+      })
+    end,
+  },
+}
