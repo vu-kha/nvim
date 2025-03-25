@@ -4,6 +4,7 @@
 -- Author       : Kevin
 -- Last Modified: 17 Nov 2024, 10:49
 -------------------------------------
+
 ---- Get defaults columns view
 ---@param detailed boolean if true get the detailed view, compact otherwise
 local function default_coloumns(detailed)
@@ -16,6 +17,7 @@ local function default_coloumns(detailed)
       }
     or { "icon" }
 end
+
 return {
   "stevearc/oil.nvim",
   -- enabled = false,
@@ -129,6 +131,7 @@ return {
         return conf
       end,
     },
+
     progress = {
       win_options = {
         winblend = 8,
@@ -146,12 +149,11 @@ return {
     if vim.fn.argc() == 1 then
       local argv = tostring(vim.fn.argv(0))
       local stat = vim.loop.fs_stat(argv)
+
       local remote_dir_args = vim.startswith(argv, "ssh")
         or vim.startswith(argv, "sftp")
-        or not (
-          (os.getenv("LEGACY_HOST1") and vim.startswith(argv, "scp://" .. os.getenv("LEGACY_HOST1")) or false)
-          or (os.getenv("LEGACY_HOST2") and vim.startswith(argv, "scp://" .. os.getenv("LEGACY_HOST2")))
-        )
+        or vim.startswith(argv, "scp://platypus")
+
       if stat and stat.type == "directory" or remote_dir_args then
         require("lazy").load({ plugins = { p.name } })
       end
@@ -164,15 +166,29 @@ return {
           return true
         end,
       })
+      -- BufEnter
+      -- vim.api.nvim_create_autocmd({ "BufReadCmd", "BufNewFile" }, {
+      --   pattern = "scp://platypus//*",
       vim.api.nvim_create_autocmd("BufNew", {
-        pattern = "scp://" .. os.getenv("LEGACY_HOST1") .. "//*",
+        pattern = "scp://platypus//*",
         callback = function(args)
           local path = args.file -- Get the file path
           print("Path" .. path)
           -- vim.cmd("edit " .. path) -- Force 'netrw' to open the file
         end,
       })
+      -- vim.api.nvim_create_autocmd({ "BufReadCmd", "BufNewFile" }, {
+      --   pattern = "scp://platypus//*",
+      --   callback = function(args)
+      --     local path = args.file -- Get the file path
+      --     print("bufreadcmd bufnewfile event")
+      --     vim.cmd("packadd netrw") -- Ensure netrw is loaded
+      --     vim.cmd("runtime! autoload/netrw.vim") -- Explicitly load netrw autoload functions
+      --     vim.cmd("edit " .. path) -- Force 'netrw' to open the file
+      --   end,
+      -- })
     else
+      print("i am here..")
       -- vim.cmd("edit ")
     end
   end,

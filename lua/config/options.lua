@@ -123,12 +123,4 @@ vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
   callback = update_winbar,
 })
 
--- Set up an autocommand to ensure `netrw` handles `scp://` paths
--- vim.api.nvim_create_autocmd("BufReadCmd", {
---   pattern = "scp://*",
---   callback = function(args)
---     local path = args.file -- Get the file path
---     print(path)
---     vim.cmd("edit " .. path) -- Force `netrw` to open the file
---   end,
--- })
+-- vim.opt.rtp:append(vim.fn.stdpath("config") .. "/lua/user")
