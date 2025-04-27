@@ -10,6 +10,16 @@ return {
       -- suggestion = { enabled = true }, -- Enable suggestions
       -- panel = { enabled = true }, -- Enable panel
       -- See Configuration section for options
+      prompts = {
+        Remane = {
+          prompt = "Please rename the variable correctly in given selection based on context",
+          mapping = "<leader>zR",
+          selection = function(source)
+            local select = require("CopilotChat.select")
+            return select.visual(source)
+          end,
+        },
+      },
     },
     keys = {
       { "<leader>zc", ":CopilotChat<CR>", mode = "n", desc = "Chat with Copilot", { noremap = true, silent = true } },
@@ -29,13 +39,6 @@ return {
         "<leader>zm",
         ":CopilotChatCommit<CR>",
         mode = "n",
-        desc = "Generate Commit Message",
-        { noremap = true, silent = true },
-      },
-      {
-        "<leader>zs",
-        ":CopilotChatCommit<CR>",
-        mode = "v",
         desc = "Generate Commit Message",
         { noremap = true, silent = true },
       },

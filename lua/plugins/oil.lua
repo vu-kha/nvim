@@ -20,7 +20,7 @@ end
 
 return {
   "stevearc/oil.nvim",
-  -- enabled = false,
+  enabled = false,
   keys = {
     {
       "<leader>E",
