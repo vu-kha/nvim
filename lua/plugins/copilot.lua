@@ -38,6 +38,8 @@ return {
             dismiss = "<C-e>",
           },
         },
+        user_prompt = "You:",
+        system_prompt = "Assistant",
       })
     end,
   },
